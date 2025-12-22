@@ -60,11 +60,13 @@ Contoh format file:
 ```csv
 id,nama,kategori,jumlah,kondisi
 BRG01,Mic Wireless,Elektronik,2,Baik
+```
+
 ## ⚠️ Exception Handling
 Aplikasi menerapkan penanganan error menggunakan try-catch, antara lain:
-Validasi input angka
-File tidak ditemukan
-Data kosong atau tidak valid
+- Validasi input angka
+- File tidak ditemukan
+- Data kosong atau tidak valid
 ## 👥 Tim Pengembang
 - Mohamad Akbar Noviandi
 - Figa Brilliant Daffa
@@ -72,21 +74,21 @@ Data kosong atau tidak valid
 Repository dikelola menggunakan GitHub
 Push dilakukan secara berkala
 Menggunakan branching fitur:
-feature-ui
-feature-crud
-feature-file-handling
+- feature-ui
+- feature-crud
+- feature-file-handling
 Seluruh fitur digabungkan ke branch main
 Repository dilengkapi dengan file README.md
 ## 🧪 Testing & Code Review
 Pengujian dilakukan secara manual
 Skenario testing meliputi:
-Tambah, edit, hapus data
-Penyimpanan data ke file
-Validasi input
+- Tambah, edit, hapus data
+- Penyimpanan data ke file
+- Validasi input
 Code review dilakukan untuk:
-Penamaan variabel
-Duplikasi kode
-Struktur program
+- Penamaan variabel
+- Duplikasi kode
+- Struktur program
 ## 📌 Catatan
 Project ini dibuat untuk memenuhi Ujian Akhir Praktikum (UAP)
 Mata Kuliah: Pemrograman Lanjut
