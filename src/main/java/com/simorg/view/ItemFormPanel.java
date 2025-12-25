@@ -3,11 +3,25 @@ package com.simorg.view;
 import javax.swing.*;
 import java.awt.*;
 
+import com.simorg.controller.ItemController;
+import com.simorg.model.Item;
+
 public class ItemFormPanel extends JPanel {
     private JTextField idField, namaField, lokasiField;
     private JComboBox<String> kategoriComboBox, kondisiComboBox;
     private JSpinner jumlahSpinner;
     private JTextArea deskripsiArea;
+
+    // Controller and state
+    private ItemController controller;
+    private Item editingItem;
+    private boolean isEditMode = false;
+
+    // Buttons stored as fields for adding listeners
+    private JButton saveBtn, clearBtn, cancelBtn;
+
+    // Callback for after save
+    private Runnable onSaveCallback;
 
     public ItemFormPanel() {
         setLayout(new BorderLayout());
@@ -29,6 +43,9 @@ public class ItemFormPanel extends JPanel {
         noteLabel.setForeground(new Color(231, 76, 60));
         noteLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         add(noteLabel, BorderLayout.SOUTH);
+
+        // Setup button actions
+        setupButtonActions();
     }
 
     private JPanel createFormPanel() {
@@ -110,9 +127,9 @@ public class ItemFormPanel extends JPanel {
         buttonPanel.setMaximumSize(new Dimension(450, 50));
         buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JButton saveBtn = createFormButton("Simpan", new Color(46, 204, 113));
-        JButton clearBtn = createFormButton("Bersihkan", new Color(243, 156, 18));
-        JButton cancelBtn = createFormButton("Batal", new Color(52, 73, 94));
+        saveBtn = createFormButton("Simpan", new Color(46, 204, 113));
+        clearBtn = createFormButton("Bersihkan", new Color(243, 156, 18));
+        cancelBtn = createFormButton("Batal", new Color(52, 73, 94));
 
         buttonPanel.add(saveBtn);
         buttonPanel.add(clearBtn);
@@ -143,5 +160,165 @@ public class ItemFormPanel extends JPanel {
         btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
+    }
+
+    // ===================== CRUD INTEGRATION =====================
+
+    private void setupButtonActions() {
+        saveBtn.addActionListener(e -> saveItem());
+        clearBtn.addActionListener(e -> clearForm());
+        cancelBtn.addActionListener(e -> cancelEdit());
+    }
+
+    /**
+     * Set controller untuk panel ini.
+     */
+    public void setController(ItemController controller) {
+        this.controller = controller;
+    }
+
+    /**
+     * Set callback yang dipanggil setelah save berhasil.
+     */
+    public void setOnSaveCallback(Runnable callback) {
+        this.onSaveCallback = callback;
+    }
+
+    /**
+     * Set item untuk mode edit.
+     */
+    public void setItemForEdit(Item item) {
+        if (item != null) {
+            this.editingItem = item;
+            this.isEditMode = true;
+
+            idField.setText(item.getId());
+            namaField.setText(item.getName());
+            kategoriComboBox.setSelectedItem(item.getCategory());
+            jumlahSpinner.setValue(item.getQuantity());
+            kondisiComboBox.setSelectedItem(item.getCondition());
+            lokasiField.setText(item.getLocation() != null ? item.getLocation() : "");
+            deskripsiArea.setText(item.getDescription() != null ? item.getDescription() : "");
+
+            saveBtn.setText("Update");
+        }
+    }
+
+    /**
+     * Simpan atau update item.
+     */
+    private void saveItem() {
+        // Validasi
+        String nama = namaField.getText().trim();
+        if (nama.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Nama barang wajib diisi!",
+                    "Validasi Error",
+                    JOptionPane.ERROR_MESSAGE);
+            namaField.requestFocus();
+            return;
+        }
+
+        String kategori = (String) kategoriComboBox.getSelectedItem();
+        int jumlah = (Integer) jumlahSpinner.getValue();
+        String kondisi = (String) kondisiComboBox.getSelectedItem();
+        String lokasi = lokasiField.getText().trim();
+        String deskripsi = deskripsiArea.getText().trim();
+
+        if (controller == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Controller belum diinisialisasi!",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (isEditMode && editingItem != null) {
+            // Update existing item
+            Item updatedItem = new Item(
+                    editingItem.getId(),
+                    nama, kategori, jumlah, kondisi, lokasi,
+                    editingItem.getDateAdded(),
+                    deskripsi);
+
+            boolean success = controller.updateItem(editingItem.getId(), updatedItem);
+            if (success) {
+                JOptionPane.showMessageDialog(this,
+                        "Barang berhasil diupdate!",
+                        "Sukses",
+                        JOptionPane.INFORMATION_MESSAGE);
+                clearForm();
+                if (onSaveCallback != null) {
+                    onSaveCallback.run();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Gagal mengupdate barang!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            // Add new item
+            Item newItem = new Item(nama, kategori, jumlah, kondisi, lokasi, deskripsi);
+            controller.addItem(newItem);
+
+            JOptionPane.showMessageDialog(this,
+                    "Barang berhasil ditambahkan dengan ID: " + newItem.getId(),
+                    "Sukses",
+                    JOptionPane.INFORMATION_MESSAGE);
+            clearForm();
+            if (onSaveCallback != null) {
+                onSaveCallback.run();
+            }
+        }
+    }
+
+    /**
+     * Bersihkan form.
+     */
+    public void clearForm() {
+        idField.setText("(Auto-generated)");
+        namaField.setText("");
+        kategoriComboBox.setSelectedIndex(0);
+        jumlahSpinner.setValue(1);
+        kondisiComboBox.setSelectedIndex(0);
+        lokasiField.setText("");
+        deskripsiArea.setText("");
+
+        isEditMode = false;
+        editingItem = null;
+        saveBtn.setText("Simpan");
+    }
+
+    /**
+     * Batal edit.
+     */
+    private void cancelEdit() {
+        clearForm();
+    }
+
+    // Getters untuk form fields (jika diperlukan)
+    public JTextField getNamaField() {
+        return namaField;
+    }
+
+    public JComboBox<String> getKategoriComboBox() {
+        return kategoriComboBox;
+    }
+
+    public JSpinner getJumlahSpinner() {
+        return jumlahSpinner;
+    }
+
+    public JComboBox<String> getKondisiComboBox() {
+        return kondisiComboBox;
+    }
+
+    public JTextField getLokasiField() {
+        return lokasiField;
+    }
+
+    public JTextArea getDeskripsiArea() {
+        return deskripsiArea;
     }
 }

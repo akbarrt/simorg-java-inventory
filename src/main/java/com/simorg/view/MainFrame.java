@@ -4,6 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import com.simorg.controller.ItemController;
+import com.simorg.controller.LoanController;
+import com.simorg.model.Item;
+
 public class MainFrame extends JFrame {
 
     private CardLayout cardLayout;
@@ -16,6 +20,10 @@ public class MainFrame extends JFrame {
     private ItemFormPanel itemFormPanel;
     private LoanListPanel loanListPanel;
     private ReportPanel reportPanel;
+
+    // Controllers
+    private ItemController itemController;
+    private LoanController loanController;
 
     public MainFrame() {
         setTitle("SIMORG - Smart Inventory Management for Organization");
@@ -42,6 +50,9 @@ public class MainFrame extends JFrame {
         add(contentPanel, BorderLayout.CENTER);
 
         cardLayout.show(contentPanel, "Dashboard");
+
+        // Refresh data saat startup
+        refreshAllData();
     }
 
     // ================= SIDEBAR =================
@@ -57,8 +68,6 @@ public class MainFrame extends JFrame {
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        sidebar.add(titleLabel);
-        sidebar.add(Box.createVerticalStrut(30));
         sidebar.add(titleLabel);
         sidebar.add(Box.createVerticalStrut(30));
 
@@ -139,14 +148,99 @@ public class MainFrame extends JFrame {
         activeButton = clickedButton;
         clickedButton.setBackground(new Color(60, 70, 85));
         cardLayout.show(contentPanel, panelName);
+
+        // Refresh data saat panel dibuka
+        refreshPanelData(panelName);
+    }
+
+    private void refreshPanelData(String panelName) {
+        switch (panelName) {
+            case "Dashboard":
+                dashboardPanel.refreshStats();
+                break;
+            case "Data Inventaris":
+                itemListPanel.refreshTable();
+                break;
+            case "Peminjaman":
+                loanListPanel.refreshTable();
+                break;
+            case "Laporan":
+                reportPanel.refreshData();
+                break;
+        }
+    }
+
+    private void refreshAllData() {
+        dashboardPanel.refreshStats();
+        itemListPanel.refreshTable();
+        loanListPanel.refreshTable();
+        reportPanel.refreshData();
     }
 
     private void initializePanels() {
+        // Initialize panels
         dashboardPanel = new DashboardPanel();
         itemListPanel = new ItemListPanel();
         itemFormPanel = new ItemFormPanel();
         loanListPanel = new LoanListPanel();
         reportPanel = new ReportPanel();
+
+        // Set controllers
+        itemFormPanel.setController(itemController);
+        itemListPanel.setController(itemController);
+        loanListPanel.setControllers(loanController, itemController);
+        dashboardPanel.setControllers(itemController, loanController);
+        reportPanel.setControllers(itemController, loanController);
+
+        // Setup callbacks untuk ItemFormPanel
+        itemFormPanel.setOnSaveCallback(() -> {
+            itemListPanel.refreshTable();
+            dashboardPanel.refreshStats();
+            reportPanel.refreshData();
+        });
+
+        // Setup callbacks untuk ItemListPanel
+        itemListPanel.setOnAddCallback(() -> {
+            itemFormPanel.clearForm();
+            switchToPanel("Tambah Barang");
+        });
+
+        itemListPanel.setOnEditCallback((Item item) -> {
+            itemFormPanel.setItemForEdit(item);
+            switchToPanel("Tambah Barang");
+        });
+
+        // Setup callbacks untuk DashboardPanel
+        dashboardPanel.setOnTambahCallback(() -> {
+            itemFormPanel.clearForm();
+            switchToPanel("Tambah Barang");
+        });
+        dashboardPanel.setOnLihatInventoryCallback(() -> switchToPanel("Data Inventaris"));
+        dashboardPanel.setOnKelolaPeminjamanCallback(() -> switchToPanel("Peminjaman"));
+        dashboardPanel.setOnLihatLaporanCallback(() -> switchToPanel("Laporan"));
+    }
+
+    /**
+     * Helper method untuk switch panel programmatically.
+     */
+    private void switchToPanel(String panelName) {
+        cardLayout.show(contentPanel, panelName);
+        refreshPanelData(panelName);
+
+        // Update active button styling (find button by text)
+        for (Component comp : ((JPanel) getContentPane().getComponent(0)).getComponents()) {
+            if (comp instanceof JButton) {
+                JButton btn = (JButton) comp;
+                if (btn.getText().equals(panelName)) {
+                    if (activeButton != null) {
+                        activeButton.setBackground(new Color(45, 52, 64));
+                    }
+                    activeButton = btn;
+                    btn.setBackground(new Color(60, 70, 85));
+                    break;
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {

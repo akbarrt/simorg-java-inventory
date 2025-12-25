@@ -4,6 +4,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.util.List;
+
+import com.simorg.controller.ItemController;
+import com.simorg.model.Item;
 
 public class ItemListPanel extends JPanel {
     private JTable table;
@@ -11,6 +15,16 @@ public class ItemListPanel extends JPanel {
     private JTextField searchField;
     private JComboBox<String> sortComboBox;
     private JCheckBox ascendingCheckBox;
+
+    // Controller
+    private ItemController controller;
+
+    // Buttons stored as fields
+    private JButton refreshBtn, addBtn, editBtn, deleteBtn, detailBtn;
+
+    // Callback untuk navigasi ke form panel
+    private Runnable onAddCallback;
+    private java.util.function.Consumer<Item> onEditCallback;
 
     private void configureColumnWidths() {
         table.getColumnModel().getColumn(0).setPreferredWidth(150); // ID
@@ -34,6 +48,8 @@ public class ItemListPanel extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
 
         add(createControlPanel(), BorderLayout.CENTER);
+
+        setupButtonActions();
     }
 
     private JPanel createControlPanel() {
@@ -69,7 +85,7 @@ public class ItemListPanel extends JPanel {
         ascendingCheckBox.setSelected(true);
         leftControls.add(ascendingCheckBox);
 
-        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn = new JButton("Refresh");
         refreshBtn.setPreferredSize(new Dimension(100, 32));
         refreshBtn.setBackground(new Color(52, 73, 94));
         refreshBtn.setForeground(Color.WHITE);
@@ -79,7 +95,7 @@ public class ItemListPanel extends JPanel {
 
         topPanel.add(leftControls, BorderLayout.WEST);
 
-        JButton addBtn = new JButton("Tambahkan");
+        addBtn = new JButton("Tambahkan");
         addBtn.setPreferredSize(new Dimension(120, 35));
         addBtn.setBackground(new Color(52, 152, 219));
         addBtn.setForeground(Color.WHITE);
@@ -104,10 +120,6 @@ public class ItemListPanel extends JPanel {
             }
         };
 
-        tableModel.addRow(new Object[] {
-                "ITM176664363419", "Mouse", "Elektronik", "5", "Baik", "Rack 1", "2025-12-25", "Mouse Fantech"
-        });
-
         table = new JTable(tableModel);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         configureColumnWidths();
@@ -115,6 +127,7 @@ public class ItemListPanel extends JPanel {
         table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         table.setSelectionBackground(new Color(189, 195, 199));
         table.setGridColor(new Color(220, 220, 220));
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         ToolTipManager.sharedInstance().unregisterComponent(table.getTableHeader());
 
@@ -145,9 +158,9 @@ public class ItemListPanel extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 15));
         panel.setOpaque(false);
 
-        JButton editBtn = createBottomButton("Edit", new Color(243, 156, 18));
-        JButton deleteBtn = createBottomButton("Hapus", new Color(231, 76, 60));
-        JButton detailBtn = createBottomButton("Detail", new Color(52, 73, 94));
+        editBtn = createBottomButton("Edit", new Color(243, 156, 18));
+        deleteBtn = createBottomButton("Hapus", new Color(231, 76, 60));
+        detailBtn = createBottomButton("Detail", new Color(52, 73, 94));
 
         panel.add(editBtn);
         panel.add(deleteBtn);
@@ -166,5 +179,237 @@ public class ItemListPanel extends JPanel {
         btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
+    }
+
+    // ===================== CRUD INTEGRATION =====================
+
+    private void setupButtonActions() {
+        refreshBtn.addActionListener(e -> refreshTable());
+
+        addBtn.addActionListener(e -> {
+            if (onAddCallback != null) {
+                onAddCallback.run();
+            }
+        });
+
+        editBtn.addActionListener(e -> editSelectedItem());
+        deleteBtn.addActionListener(e -> deleteSelectedItem());
+        detailBtn.addActionListener(e -> showItemDetail());
+
+        // Search listener
+        searchField.addActionListener(e -> performSearch());
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+        });
+
+        // Sort listeners
+        sortComboBox.addActionListener(e -> performSort());
+        ascendingCheckBox.addActionListener(e -> performSort());
+    }
+
+    /**
+     * Set controller untuk panel ini.
+     */
+    public void setController(ItemController controller) {
+        this.controller = controller;
+    }
+
+    /**
+     * Set callback untuk navigasi ke add form.
+     */
+    public void setOnAddCallback(Runnable callback) {
+        this.onAddCallback = callback;
+    }
+
+    /**
+     * Set callback untuk edit item.
+     */
+    public void setOnEditCallback(java.util.function.Consumer<Item> callback) {
+        this.onEditCallback = callback;
+    }
+
+    /**
+     * Refresh data dari controller ke table.
+     */
+    public void refreshTable() {
+        tableModel.setRowCount(0);
+
+        if (controller == null)
+            return;
+
+        List<Item> items = controller.getAllItems();
+        for (Item item : items) {
+            tableModel.addRow(new Object[] {
+                    item.getId(),
+                    item.getName(),
+                    item.getCategory(),
+                    item.getQuantity(),
+                    item.getCondition(),
+                    item.getLocation() != null ? item.getLocation() : "",
+                    item.getDateAdded() != null ? item.getDateAdded().toString() : "",
+                    item.getDescription() != null ? item.getDescription() : ""
+            });
+        }
+    }
+
+    /**
+     * Perform search based on keyword.
+     */
+    private void performSearch() {
+        if (controller == null)
+            return;
+
+        String keyword = searchField.getText().trim();
+        List<Item> items = controller.searchItems(keyword);
+
+        tableModel.setRowCount(0);
+        for (Item item : items) {
+            tableModel.addRow(new Object[] {
+                    item.getId(),
+                    item.getName(),
+                    item.getCategory(),
+                    item.getQuantity(),
+                    item.getCondition(),
+                    item.getLocation() != null ? item.getLocation() : "",
+                    item.getDateAdded() != null ? item.getDateAdded().toString() : "",
+                    item.getDescription() != null ? item.getDescription() : ""
+            });
+        }
+    }
+
+    /**
+     * Perform sorting.
+     */
+    private void performSort() {
+        if (controller == null)
+            return;
+
+        String sortField = (String) sortComboBox.getSelectedItem();
+        boolean ascending = ascendingCheckBox.isSelected();
+
+        List<Item> items = controller.sortItems(sortField, ascending);
+
+        tableModel.setRowCount(0);
+        for (Item item : items) {
+            tableModel.addRow(new Object[] {
+                    item.getId(),
+                    item.getName(),
+                    item.getCategory(),
+                    item.getQuantity(),
+                    item.getCondition(),
+                    item.getLocation() != null ? item.getLocation() : "",
+                    item.getDateAdded() != null ? item.getDateAdded().toString() : "",
+                    item.getDescription() != null ? item.getDescription() : ""
+            });
+        }
+    }
+
+    /**
+     * Get selected item from table.
+     */
+    private Item getSelectedItem() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Pilih item terlebih dahulu!",
+                    "Peringatan",
+                    JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+
+        String id = (String) tableModel.getValueAt(selectedRow, 0);
+        return controller != null ? controller.getItemById(id) : null;
+    }
+
+    /**
+     * Edit selected item.
+     */
+    private void editSelectedItem() {
+        Item item = getSelectedItem();
+        if (item != null && onEditCallback != null) {
+            onEditCallback.accept(item);
+        }
+    }
+
+    /**
+     * Delete selected item.
+     */
+    private void deleteSelectedItem() {
+        Item item = getSelectedItem();
+        if (item == null)
+            return;
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Apakah Anda yakin ingin menghapus barang:\n" + item.getName() + "?",
+                "Konfirmasi Hapus",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            boolean success = controller.deleteItem(item.getId());
+            if (success) {
+                JOptionPane.showMessageDialog(this,
+                        "Barang berhasil dihapus!",
+                        "Sukses",
+                        JOptionPane.INFORMATION_MESSAGE);
+                refreshTable();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Gagal menghapus barang!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Show item detail.
+     */
+    private void showItemDetail() {
+        Item item = getSelectedItem();
+        if (item == null)
+            return;
+
+        String detail = String.format(
+                "<html><b>ID:</b> %s<br>" +
+                        "<b>Nama:</b> %s<br>" +
+                        "<b>Kategori:</b> %s<br>" +
+                        "<b>Jumlah:</b> %d<br>" +
+                        "<b>Kondisi:</b> %s<br>" +
+                        "<b>Lokasi:</b> %s<br>" +
+                        "<b>Tanggal Ditambahkan:</b> %s<br>" +
+                        "<b>Deskripsi:</b> %s</html>",
+                item.getId(),
+                item.getName(),
+                item.getCategory(),
+                item.getQuantity(),
+                item.getCondition(),
+                item.getLocation() != null ? item.getLocation() : "-",
+                item.getDateAdded() != null ? item.getDateAdded().toString() : "-",
+                item.getDescription() != null ? item.getDescription() : "-");
+
+        JOptionPane.showMessageDialog(this,
+                detail,
+                "Detail Barang",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Getters
+    public DefaultTableModel getTableModel() {
+        return tableModel;
+    }
+
+    public JTable getTable() {
+        return table;
     }
 }

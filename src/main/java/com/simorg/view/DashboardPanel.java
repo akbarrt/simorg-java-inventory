@@ -3,7 +3,29 @@ package com.simorg.view;
 import javax.swing.*;
 import java.awt.*;
 
+import com.simorg.controller.ItemController;
+import com.simorg.controller.LoanController;
+
 public class DashboardPanel extends JPanel {
+
+    // Controllers
+    private ItemController itemController;
+    private LoanController loanController;
+
+    // Stat card value labels (untuk update dinamis)
+    private JLabel totalJenisValue;
+    private JLabel totalQtyValue;
+    private JLabel peminjamanAktifValue;
+    private JLabel terlambatValue;
+
+    // Action buttons
+    private JButton tambahBtn, lihatInventoryBtn, kelolaPeminjamanBtn, lihatLaporanBtn;
+
+    // Callbacks untuk navigasi
+    private Runnable onTambahCallback;
+    private Runnable onLihatInventoryCallback;
+    private Runnable onKelolaPeminjamanCallback;
+    private Runnable onLihatLaporanCallback;
 
     public DashboardPanel() {
         setLayout(new BorderLayout());
@@ -39,6 +61,8 @@ public class DashboardPanel extends JPanel {
         footerLabel.setForeground(new Color(127, 140, 141));
         footerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         add(footerLabel, BorderLayout.SOUTH);
+
+        setupButtonActions();
     }
 
     private JPanel createStatsPanel() {
@@ -46,10 +70,21 @@ public class DashboardPanel extends JPanel {
         statsPanel.setOpaque(false);
         statsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
-        statsPanel.add(createStatCard("1", "Total Jenis Barang", new Color(52, 152, 219)));
-        statsPanel.add(createStatCard("5", "Total Quantity", new Color(46, 204, 113)));
-        statsPanel.add(createStatCard("0", "Peminjaman Aktif", new Color(241, 196, 15)));
-        statsPanel.add(createStatCard("0", "Terlambat", new Color(231, 76, 60)));
+        JPanel card1 = createStatCard("0", "Total Jenis Barang", new Color(52, 152, 219));
+        JPanel card2 = createStatCard("0", "Total Quantity", new Color(46, 204, 113));
+        JPanel card3 = createStatCard("0", "Peminjaman Aktif", new Color(241, 196, 15));
+        JPanel card4 = createStatCard("0", "Terlambat", new Color(231, 76, 60));
+
+        // Simpan referensi ke value labels
+        totalJenisValue = (JLabel) ((JPanel) card1.getComponent(1)).getComponent(0);
+        totalQtyValue = (JLabel) ((JPanel) card2.getComponent(1)).getComponent(0);
+        peminjamanAktifValue = (JLabel) ((JPanel) card3.getComponent(1)).getComponent(0);
+        terlambatValue = (JLabel) ((JPanel) card4.getComponent(1)).getComponent(0);
+
+        statsPanel.add(card1);
+        statsPanel.add(card2);
+        statsPanel.add(card3);
+        statsPanel.add(card4);
 
         return statsPanel;
     }
@@ -108,10 +143,15 @@ public class DashboardPanel extends JPanel {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         buttonsPanel.setOpaque(false);
 
-        buttonsPanel.add(createActionButton("Tambah", new Color(52, 152, 219)));
-        buttonsPanel.add(createActionButton("Lihat Invetory", new Color(52, 73, 94)));
-        buttonsPanel.add(createActionButton("Kelola Peminjaman", new Color(243, 156, 18)));
-        buttonsPanel.add(createActionButton("Lihat Laporan", new Color(46, 204, 113)));
+        tambahBtn = createActionButton("Tambah", new Color(52, 152, 219));
+        lihatInventoryBtn = createActionButton("Lihat Inventory", new Color(52, 73, 94));
+        kelolaPeminjamanBtn = createActionButton("Kelola Peminjaman", new Color(243, 156, 18));
+        lihatLaporanBtn = createActionButton("Lihat Laporan", new Color(46, 204, 113));
+
+        buttonsPanel.add(tambahBtn);
+        buttonsPanel.add(lihatInventoryBtn);
+        buttonsPanel.add(kelolaPeminjamanBtn);
+        buttonsPanel.add(lihatLaporanBtn);
 
         panel.add(buttonsPanel, BorderLayout.CENTER);
 
@@ -139,5 +179,68 @@ public class DashboardPanel extends JPanel {
         });
 
         return btn;
+    }
+
+    // ===================== INTEGRATION =====================
+
+    private void setupButtonActions() {
+        tambahBtn.addActionListener(e -> {
+            if (onTambahCallback != null)
+                onTambahCallback.run();
+        });
+        lihatInventoryBtn.addActionListener(e -> {
+            if (onLihatInventoryCallback != null)
+                onLihatInventoryCallback.run();
+        });
+        kelolaPeminjamanBtn.addActionListener(e -> {
+            if (onKelolaPeminjamanCallback != null)
+                onKelolaPeminjamanCallback.run();
+        });
+        lihatLaporanBtn.addActionListener(e -> {
+            if (onLihatLaporanCallback != null)
+                onLihatLaporanCallback.run();
+        });
+    }
+
+    /**
+     * Set controllers.
+     */
+    public void setControllers(ItemController itemController, LoanController loanController) {
+        this.itemController = itemController;
+        this.loanController = loanController;
+    }
+
+    /**
+     * Set navigation callbacks.
+     */
+    public void setOnTambahCallback(Runnable callback) {
+        this.onTambahCallback = callback;
+    }
+
+    public void setOnLihatInventoryCallback(Runnable callback) {
+        this.onLihatInventoryCallback = callback;
+    }
+
+    public void setOnKelolaPeminjamanCallback(Runnable callback) {
+        this.onKelolaPeminjamanCallback = callback;
+    }
+
+    public void setOnLihatLaporanCallback(Runnable callback) {
+        this.onLihatLaporanCallback = callback;
+    }
+
+    /**
+     * Refresh statistics dari data controller.
+     */
+    public void refreshStats() {
+        if (itemController != null) {
+            totalJenisValue.setText(String.valueOf(itemController.getTotalItemTypes()));
+            totalQtyValue.setText(String.valueOf(itemController.getTotalQuantity()));
+        }
+
+        if (loanController != null) {
+            peminjamanAktifValue.setText(String.valueOf(loanController.getActiveLoanCount()));
+            terlambatValue.setText(String.valueOf(loanController.getOverdueLoanCount()));
+        }
     }
 }
