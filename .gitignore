@@ -1,6 +1,8 @@
 # Compiled class files
-out/
 *.class
+
+# Maven build output
+target/
 
 # IDE files
 .idea/
@@ -9,14 +11,21 @@ out/
 .settings/
 .project
 .classpath
+*.swp
+*.swo
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Build files
-target/
-build/
-
 # Logs
 *.log
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Compiled output (legacy)
+out/
+build/
