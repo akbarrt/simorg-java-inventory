@@ -2,7 +2,7 @@
 
 **Smart Inventory Management for Organization**
 
-SIMORG adalah aplikasi desktop berbasis **Java Swing** yang dikembangkan untuk membantu organisasi mengelola data inventaris dan peminjaman secara terstruktur. Aplikasi ini mendukung operasi CRUD, sorting, searching, dan penyimpanan data permanen menggunakan **File Handling (.csv)**.
+SIMORG adalah aplikasi desktop berbasis **Java Swing** yang dikembangkan untuk membantu organisasi mengelola data inventaris secara terstruktur. Aplikasi ini mendukung operasi CRUD, sorting, searching, dan penyimpanan data permanen menggunakan **File Handling (.csv)**.
 
 ---
 
@@ -14,26 +14,20 @@ simorg-java-inventory/
 │   ├── app/
 │   │   └── Main.java                  ← Entry point aplikasi
 │   ├── model/
-│   │   ├── Item.java                  ← Model barang (OOP + CSV parse)
-│   │   └── Loan.java                  ← Model peminjaman
+│   │   └── Item.java                  ← Model barang (OOP + CSV parse)
 │   ├── controller/
-│   │   ├── ItemController.java        ← CRUD + search + sort items
-│   │   └── LoanController.java        ← CRUD loans + return logic
+│   │   └── ItemController.java        ← CRUD + search + sort items
 │   ├── util/
 │   │   ├── FileHandler.java           ← Read/write CSV
-│   │   ├── UIConstants.java           ← Warna, font, helper dialog
-│   │   ├── ItemComparators.java       ← Sorting dengan Comparator
-│   │   └── ValidationHelper.java      ← Validasi + exception handling
+│   │   └── IdGenerator.java           ← Generate unique ID
 │   └── view/
 │       ├── MainFrame.java             ← Frame utama + CardLayout navigasi
 │       ├── DashboardPanel.java        ← Statistik + quick actions
 │       ├── ItemListPanel.java         ← JTable + sorting + searching
 │       ├── ItemFormPanel.java         ← Form tambah/edit barang
-│       ├── LoanListPanel.java         ← Kelola peminjaman
-│       └── ReportPanel.java           ← Laporan + history
+│       └── ReportPanel.java           ← Laporan ringkasan
 ├── data/
-│   ├── items.csv                      ← Sample data inventaris (8 items)
-│   └── loans.csv                      ← Sample data peminjaman (4 loans)
+│   └── items.csv                      ← Data inventaris
 └── README.md                          ← Dokumentasi lengkap
 ```
 
@@ -67,20 +61,19 @@ simorg-java-inventory/
 
 - ✅ Dashboard dengan statistik dan quick actions
 - ✅ Manajemen inventaris (CRUD - Create, Read, Update, Delete)
-- ✅ Manajemen peminjaman barang
 - ✅ Tabel data dengan fitur **sorting** dan **searching**
 - ✅ Form input dengan validasi data
-- ✅ Halaman laporan dan riwayat peminjaman
+- ✅ Halaman laporan ringkasan
 - ✅ Penyimpanan data permanen dalam format `.csv`
 - ✅ Exception handling untuk berbagai skenario error
 
 ---
 
-## 🖥️ Struktur Halaman (5 Screens)
+## 🖥️ Struktur Halaman (4 Screens)
 
 ### 1. Dashboard
 
-Menampilkan ringkasan statistik (total barang, quantity, peminjaman aktif, terlambat) dan quick access buttons.
+Menampilkan ringkasan statistik (total jenis barang, total quantity) dan quick access buttons.
 
 ### 2. Data Inventaris (ItemListPanel)
 
@@ -98,33 +91,24 @@ Form untuk menambah dan mengedit data barang dengan:
 - Kategori dropdown dengan opsi custom
 - Auto-generated ID
 
-### 4. Data Peminjaman (LoanListPanel)
-
-Kelola peminjaman dengan fitur:
-
-- Filter by status (Semua, Dipinjam, Dikembalikan, Terlambat)
-- Form input peminjaman baru
-- Proses pengembalian barang
-
-### 5. Laporan (ReportPanel)
+### 4. Laporan (ReportPanel)
 
 Menampilkan:
 
 - Statistik ringkasan inventaris
 - Breakdown per kategori
-- Riwayat aktivitas peminjaman terbaru
 
 ---
 
 ## 📦 Penjelasan Package
 
-| Package                 | Fungsi                     | Class                                                                                           |
-| ----------------------- | -------------------------- | ----------------------------------------------------------------------------------------------- |
-| `com.simorg.app`        | Entry point aplikasi       | `Main.java`                                                                                     |
-| `com.simorg.model`      | Data class / entity (OOP)  | `Item.java`, `Loan.java`                                                                        |
-| `com.simorg.view`       | UI components (Java Swing) | `MainFrame`, `DashboardPanel`, `ItemListPanel`, `ItemFormPanel`, `LoanListPanel`, `ReportPanel` |
-| `com.simorg.controller` | Business logic             | `ItemController.java`, `LoanController.java`                                                    |
-| `com.simorg.util`       | Helper/utilities           | `FileHandler`, `UIConstants`, `ItemComparators`, `ValidationHelper`                             |
+| Package                 | Fungsi                     | Class                                                                          |
+| ----------------------- | -------------------------- | ------------------------------------------------------------------------------ |
+| `com.simorg.app`        | Entry point aplikasi       | `Main.java`                                                                    |
+| `com.simorg.model`      | Data class / entity (OOP)  | `Item.java`                                                                    |
+| `com.simorg.view`       | UI components (Java Swing) | `MainFrame`, `DashboardPanel`, `ItemListPanel`, `ItemFormPanel`, `ReportPanel` |
+| `com.simorg.controller` | Business logic             | `ItemController.java`                                                          |
+| `com.simorg.util`       | Helper/utilities           | `FileHandler.java`, `IdGenerator.java`                                         |
 
 ---
 
@@ -137,13 +121,6 @@ id,name,category,quantity,condition,location,dateAdded,description
 ITM1734847200001,Laptop Dell Inspiron,Elektronik,5,Baik,Ruang IT,2024-12-01,Laptop untuk keperluan kerja staff
 ```
 
-### loans.csv
-
-```csv
-id,itemId,borrowerName,borrowerContact,quantity,loanDate,dueDate,returnDate,status,notes
-LN1734847300001,ITM1734847200001,Ahmad Fauzi,081234567890,1,2024-12-15,2024-12-22,,DIPINJAM,Untuk presentasi
-```
-
 ---
 
 ## 🔄 Alur Kerja Aplikasi
@@ -152,8 +129,7 @@ LN1734847300001,ITM1734847200001,Ahmad Fauzi,081234567890,1,2024-12-15,2024-12-2
 [Dashboard]
     ├── Klik "Tambah Barang" → [ItemFormPanel] → Submit → Data tersimpan ke items.csv
     ├── Klik "Lihat Inventaris" → [ItemListPanel] → Edit/Hapus → Update items.csv
-    ├── Klik "Kelola Peminjaman" → [LoanListPanel] → Pinjam/Kembalikan → Update loans.csv
-    └── Klik "Lihat Laporan" → [ReportPanel] → Statistik dari kedua CSV
+    └── Klik "Lihat Laporan" → [ReportPanel] → Statistik dari CSV
 ```
 
 ---
@@ -166,19 +142,19 @@ Aplikasi menerapkan penanganan error untuk:
 - File tidak ditemukan (auto-create)
 - Format CSV tidak valid
 - IOException saat read/write file
-- Data duplikat atau tidak ditemukan
 
 ---
 
 ## 🚀 Cara Menjalankan
 
-### Compile
+### Menggunakan Maven
 
 ```bash
 cd simorg-java-inventory
-javac -d out src/main/java/com/simorg/**/*.java
+mvn compile exec:java
 ```
 
+<<<<<<< HEAD
 ### Run
 
 ```bash
@@ -186,6 +162,9 @@ java -cp out com.simorg.app.Main
 ```
 
 ### Atau menggunakan IDE
+=======
+### Menggunakan IDE
+>>>>>>> feature-file-handling
 
 1. Buka project di IntelliJ IDEA / Eclipse / NetBeans
 2. Set `src/main/java` sebagai Source Root
@@ -208,12 +187,6 @@ java -cp out com.simorg.app.Main
 - `feature-crud` - Fitur CRUD
 - `feature-file-handling` - Fitur penyimpanan data
 - `main` - Branch utama (production-ready)
-
-**Practices:**
-
-- Push dilakukan secara berkala
-- Pull request untuk setiap fitur
-- Code review sebelum merge ke main
 
 ---
 
