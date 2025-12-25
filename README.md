@@ -10,37 +10,31 @@ SIMORG adalah aplikasi desktop berbasis **Java Swing** yang dikembangkan untuk m
 
 ```
 simorg-java-inventory/
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/
-│       │       └── simorg/
-│       │           ├── app/                    # Entry point aplikasi
-│       │           │   └── Main.java
-│       │           ├── controller/             # Logic bisnis (MVC)
-│       │           │   ├── ItemController.java
-│       │           │   └── LoanController.java
-│       │           ├── model/                  # Data classes (OOP)
-│       │           │   ├── Item.java
-│       │           │   └── Loan.java
-│       │           ├── util/                   # Helper utilities
-│       │           │   ├── FileHandler.java
-│       │           │   ├── ItemComparators.java
-│       │           │   ├── UIConstants.java
-│       │           │   └── ValidationHelper.java
-│       │           └── view/                   # Java Swing UI
-│       │               ├── MainFrame.java
-│       │               ├── DashboardPanel.java
-│       │               ├── ItemListPanel.java
-│       │               ├── ItemFormPanel.java
-│       │               ├── LoanListPanel.java
-│       │               └── ReportPanel.java
-│       └── resources/
-├── data/                                       # CSV data storage
-│   ├── items.csv
-│   └── loans.csv
-├── README.md
-└── LICENSE
+├── src/main/java/com/simorg/
+│   ├── app/
+│   │   └── Main.java                  ← Entry point aplikasi
+│   ├── model/
+│   │   ├── Item.java                  ← Model barang (OOP + CSV parse)
+│   │   └── Loan.java                  ← Model peminjaman
+│   ├── controller/
+│   │   ├── ItemController.java        ← CRUD + search + sort items
+│   │   └── LoanController.java        ← CRUD loans + return logic
+│   ├── util/
+│   │   ├── FileHandler.java           ← Read/write CSV
+│   │   ├── UIConstants.java           ← Warna, font, helper dialog
+│   │   ├── ItemComparators.java       ← Sorting dengan Comparator
+│   │   └── ValidationHelper.java      ← Validasi + exception handling
+│   └── view/
+│       ├── MainFrame.java             ← Frame utama + CardLayout navigasi
+│       ├── DashboardPanel.java        ← Statistik + quick actions
+│       ├── ItemListPanel.java         ← JTable + sorting + searching
+│       ├── ItemFormPanel.java         ← Form tambah/edit barang
+│       ├── LoanListPanel.java         ← Kelola peminjaman
+│       └── ReportPanel.java           ← Laporan + history
+├── data/
+│   ├── items.csv                      ← Sample data inventaris (8 items)
+│   └── loans.csv                      ← Sample data peminjaman (4 loans)
+└── README.md                          ← Dokumentasi lengkap
 ```
 
 ---

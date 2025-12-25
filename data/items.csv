@@ -1,8 +1,0 @@
-id,name,category,quantity,condition,location,dateAdded,description
-ITM1734847200001,Laptop Dell Inspiron,Elektronik,5,Baik,Ruang IT,2024-12-01,Laptop untuk keperluan kerja staff
-ITM1734847200002,Proyektor Epson,Elektronik,3,Baik,Gudang A,2024-11-15,Proyektor untuk ruang meeting
-ITM1734847200003,Meja Kerja,Furnitur,20,Baik,Ruang Kantor,2024-10-01,Meja standar ukuran 120x60cm
-ITM1734847200004,Kursi Kantor,Furnitur,25,Baik,Ruang Kantor,2024-10-01,Kursi ergonomis dengan sandaran
-ITM1734847200005,Printer HP LaserJet,Elektronik,2,Rusak Ringan,Ruang Admin,2024-09-20,Printer laser untuk dokumen
-ITM1734847200007,Spidol Whiteboard,ATK,50,Baik,Gudang B,2024-12-10,Spidol warna hitam dan merah
-ITM1734847200008,AC Split 1 PK,Elektronik,8,Baik,Gedung A,2024-06-01,AC untuk ruangan kantor
