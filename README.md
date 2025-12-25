@@ -182,7 +182,7 @@ javac -d out src/main/java/com/simorg/**/*.java
 ### Run
 
 ```bash
-java -cp out com.simorg.app.Main
+java -cp out com.simorg.app.MainFrame
 ```
 
 ### Atau menggunakan IDE
