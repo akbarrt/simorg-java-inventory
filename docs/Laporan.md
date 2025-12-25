@@ -1,6 +1,6 @@
 # Smart Inventory Management for Organization (SIMorg)
 
-![Logo UMM](../assets/logo-umm.png)
+
 
 ## 1. Pendahuluan
 ## 2. Tujuan dan Ruang Lingkup
