@@ -154,7 +154,6 @@ cd simorg-java-inventory
 mvn compile exec:java
 ```
 
-<<<<<<< HEAD
 ### Run
 
 ```bash
@@ -162,9 +161,6 @@ java -cp out com.simorg.app.Main
 ```
 
 ### Atau menggunakan IDE
-=======
-### Menggunakan IDE
->>>>>>> feature-file-handling
 
 1. Buka project di IntelliJ IDEA / Eclipse / NetBeans
 2. Set `src/main/java` sebagai Source Root
@@ -203,3 +199,15 @@ java -cp out com.simorg.app.Main
 ## 📄 Lisensi
 
 Project ini dibuat untuk keperluan akademik dan pembelajaran.
+
+---
+
+## 📊 Arsitektur Aplikasi
+
+<p align="center">
+  <img src="docs/architecture_diagram.png" alt="Architecture Diagram SIMORG" width="800">
+</p>
+
+<p align="center">
+  <em>Diagram arsitektur aplikasi SIMORG dengan pola MVC (Model-View-Controller)</em>
+</p>
