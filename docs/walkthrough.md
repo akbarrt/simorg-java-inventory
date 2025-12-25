@@ -60,7 +60,7 @@ simorg-java-inventory/
 javac -d out src/main/java/com/simorg/**/*.java
 
 # Run
-java -cp out com.simorg.app.Main
+java -cp out com.simorg.app.MainFrame
 ```
 
 **Atau buka di IDE** → Run `Main.java`
