@@ -1,6 +1,7 @@
 package com.simorg.controller;
 
 import com.simorg.model.Item;
+import com.simorg.util.FileHandler;
 import com.simorg.util.IdGenerator;
 
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * Controller untuk mengelola operasi CRUD Item.
- * Data disimpan dalam memory (ArrayList).
+ * Data disimpan dalam memory (ArrayList) dan di-persist ke file CSV.
  */
 public class ItemController {
 
@@ -19,6 +20,25 @@ public class ItemController {
 
     public ItemController() {
         this.items = new ArrayList<>();
+    }
+
+    /**
+     * Load data dari file CSV.
+     */
+    public void loadFromFile() {
+        List<Item> loadedItems = FileHandler.loadItems();
+        this.items = new ArrayList<>(loadedItems);
+        System.out.println("Loaded " + items.size() + " items from file.");
+    }
+
+    /**
+     * Simpan data ke file CSV.
+     */
+    public void saveToFile() {
+        boolean success = FileHandler.saveItems(items);
+        if (success) {
+            System.out.println("Saved " + items.size() + " items to file.");
+        }
     }
 
     /**
@@ -32,6 +52,7 @@ public class ItemController {
             item.setDateAdded(LocalDate.now());
         }
         items.add(item);
+        saveToFile(); // Auto-save
     }
 
     /**
@@ -42,6 +63,7 @@ public class ItemController {
             if (items.get(i).getId().equals(id)) {
                 updatedItem.setId(id);
                 items.set(i, updatedItem);
+                saveToFile(); // Auto-save
                 return true;
             }
         }
@@ -52,7 +74,11 @@ public class ItemController {
      * Hapus item berdasarkan ID.
      */
     public boolean deleteItem(String id) {
-        return items.removeIf(item -> item.getId().equals(id));
+        boolean removed = items.removeIf(item -> item.getId().equals(id));
+        if (removed) {
+            saveToFile(); // Auto-save
+        }
+        return removed;
     }
 
     /**

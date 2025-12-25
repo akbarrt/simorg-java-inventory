@@ -4,27 +4,22 @@ import javax.swing.*;
 import java.awt.*;
 
 import com.simorg.controller.ItemController;
-import com.simorg.controller.LoanController;
 
 public class DashboardPanel extends JPanel {
 
     // Controllers
     private ItemController itemController;
-    private LoanController loanController;
 
     // Stat card value labels (untuk update dinamis)
     private JLabel totalJenisValue;
     private JLabel totalQtyValue;
-    private JLabel peminjamanAktifValue;
-    private JLabel terlambatValue;
 
     // Action buttons
-    private JButton tambahBtn, lihatInventoryBtn, kelolaPeminjamanBtn, lihatLaporanBtn;
+    private JButton tambahBtn, lihatInventoryBtn, lihatLaporanBtn;
 
     // Callbacks untuk navigasi
     private Runnable onTambahCallback;
     private Runnable onLihatInventoryCallback;
-    private Runnable onKelolaPeminjamanCallback;
     private Runnable onLihatLaporanCallback;
 
     public DashboardPanel() {
@@ -56,7 +51,7 @@ public class DashboardPanel extends JPanel {
         // Footer message
         JLabel footerLabel = new JLabel(
                 "<html>Selamat datang di SIMORG - Sistem Manajemen Inventaris Organisasi.<br>" +
-                        "Kelola data inventaris, pantau peminjaman, dan lihat laporan dengan mudah.</html>");
+                        "Kelola data inventaris dan lihat laporan dengan mudah.</html>");
         footerLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         footerLabel.setForeground(new Color(127, 140, 141));
         footerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
@@ -66,25 +61,19 @@ public class DashboardPanel extends JPanel {
     }
 
     private JPanel createStatsPanel() {
-        JPanel statsPanel = new JPanel(new GridLayout(1, 4, 20, 0));
+        JPanel statsPanel = new JPanel(new GridLayout(1, 2, 20, 0));
         statsPanel.setOpaque(false);
         statsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
         JPanel card1 = createStatCard("0", "Total Jenis Barang", new Color(52, 152, 219));
         JPanel card2 = createStatCard("0", "Total Quantity", new Color(46, 204, 113));
-        JPanel card3 = createStatCard("0", "Peminjaman Aktif", new Color(241, 196, 15));
-        JPanel card4 = createStatCard("0", "Terlambat", new Color(231, 76, 60));
 
         // Simpan referensi ke value labels
         totalJenisValue = (JLabel) ((JPanel) card1.getComponent(1)).getComponent(0);
         totalQtyValue = (JLabel) ((JPanel) card2.getComponent(1)).getComponent(0);
-        peminjamanAktifValue = (JLabel) ((JPanel) card3.getComponent(1)).getComponent(0);
-        terlambatValue = (JLabel) ((JPanel) card4.getComponent(1)).getComponent(0);
 
         statsPanel.add(card1);
         statsPanel.add(card2);
-        statsPanel.add(card3);
-        statsPanel.add(card4);
 
         return statsPanel;
     }
@@ -143,14 +132,12 @@ public class DashboardPanel extends JPanel {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         buttonsPanel.setOpaque(false);
 
-        tambahBtn = createActionButton("Tambah", new Color(52, 152, 219));
+        tambahBtn = createActionButton("Tambah Barang", new Color(52, 152, 219));
         lihatInventoryBtn = createActionButton("Lihat Inventory", new Color(52, 73, 94));
-        kelolaPeminjamanBtn = createActionButton("Kelola Peminjaman", new Color(243, 156, 18));
         lihatLaporanBtn = createActionButton("Lihat Laporan", new Color(46, 204, 113));
 
         buttonsPanel.add(tambahBtn);
         buttonsPanel.add(lihatInventoryBtn);
-        buttonsPanel.add(kelolaPeminjamanBtn);
         buttonsPanel.add(lihatLaporanBtn);
 
         panel.add(buttonsPanel, BorderLayout.CENTER);
@@ -192,10 +179,6 @@ public class DashboardPanel extends JPanel {
             if (onLihatInventoryCallback != null)
                 onLihatInventoryCallback.run();
         });
-        kelolaPeminjamanBtn.addActionListener(e -> {
-            if (onKelolaPeminjamanCallback != null)
-                onKelolaPeminjamanCallback.run();
-        });
         lihatLaporanBtn.addActionListener(e -> {
             if (onLihatLaporanCallback != null)
                 onLihatLaporanCallback.run();
@@ -203,11 +186,10 @@ public class DashboardPanel extends JPanel {
     }
 
     /**
-     * Set controllers.
+     * Set controller.
      */
-    public void setControllers(ItemController itemController, LoanController loanController) {
+    public void setController(ItemController itemController) {
         this.itemController = itemController;
-        this.loanController = loanController;
     }
 
     /**
@@ -221,10 +203,6 @@ public class DashboardPanel extends JPanel {
         this.onLihatInventoryCallback = callback;
     }
 
-    public void setOnKelolaPeminjamanCallback(Runnable callback) {
-        this.onKelolaPeminjamanCallback = callback;
-    }
-
     public void setOnLihatLaporanCallback(Runnable callback) {
         this.onLihatLaporanCallback = callback;
     }
@@ -236,11 +214,6 @@ public class DashboardPanel extends JPanel {
         if (itemController != null) {
             totalJenisValue.setText(String.valueOf(itemController.getTotalItemTypes()));
             totalQtyValue.setText(String.valueOf(itemController.getTotalQuantity()));
-        }
-
-        if (loanController != null) {
-            peminjamanAktifValue.setText(String.valueOf(loanController.getActiveLoanCount()));
-            terlambatValue.setText(String.valueOf(loanController.getOverdueLoanCount()));
         }
     }
 }

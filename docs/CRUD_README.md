@@ -17,8 +17,6 @@ graph TD
 
 ### Model Layer
 
-Model class untuk merepresentasikan data Item dan Loan.
-
 #### Item.java
 
 **Path**: `src/main/java/com/simorg/model/Item.java`
@@ -26,14 +24,6 @@ Model class untuk merepresentasikan data Item dan Loan.
 - Fields: `id`, `name`, `category`, `quantity`, `condition`, `location`, `dateAdded`, `description`
 - Constructor, getters, setters
 - Method `toCSVString()` dan `fromCSVString()` untuk file handling
-
-#### Loan.java
-
-**Path**: `src/main/java/com/simorg/model/Loan.java`
-
-- Fields: `id`, `itemId`, `borrowerName`, `borrowerContact`, `quantity`, `loanDate`, `dueDate`, `returnDate`, `status`, `notes`
-- Enum `LoanStatus`: DIPINJAM, DIKEMBALIKAN, TERLAMBAT
-- Constructor, getters, setters, `toCSVString()`, `fromCSVString()`
 
 ---
 
@@ -44,13 +34,10 @@ Model class untuk merepresentasikan data Item dan Loan.
 **Path**: `src/main/java/com/simorg/util/IdGenerator.java`
 
 - Method `generateItemId()` - format: `ITMyyyyMMddHHmmssSSS`
-- Method `generateLoanId()` - format: `LNyyyyMMddHHmmssSSS`
 
 ---
 
 ### Controller Layer
-
-Controller class untuk manage data dalam memory (ArrayList).
 
 #### ItemController.java
 
@@ -67,35 +54,16 @@ Controller class untuk manage data dalam memory (ArrayList).
   - `sortItems(String field, boolean ascending)` - sorting
   - `getTotalQuantity()` - total quantity semua item
 
-#### LoanController.java
-
-**Path**: `src/main/java/com/simorg/controller/LoanController.java`
-
-- Field: `ArrayList<Loan> loans`, referensi ke `ItemController`
-- Methods:
-  - `addLoan(Loan)` - tambah peminjaman baru
-  - `returnLoan(String id)` - kembalikan barang (set returnDate & status)
-  - `deleteLoan(String id)` - hapus record
-  - `getLoanById(String id)` - cari loan berdasarkan ID
-  - `getAllLoans()` - ambil semua loans
-  - `getActiveLoans()` - filter status DIPINJAM
-  - `getOverdueLoans()` - filter status TERLAMBAT
-  - `filterByStatus(String status)` - filter berdasarkan status
-  - `searchLoans(String keyword)` - cari berdasarkan nama peminjam
-
 ---
 
 ### View Integration
-
-Integrasi UI dengan controller **tanpa mengubah layout/styling UI**.
 
 | File                  | Perubahan                                               |
 | --------------------- | ------------------------------------------------------- |
 | `ItemFormPanel.java`  | Controller integration, save/update/clear functionality |
 | `ItemListPanel.java`  | Search, sort, refresh, edit, delete, detail             |
-| `LoanListPanel.java`  | Add loan dialog, return, delete, filter, search         |
 | `DashboardPanel.java` | Dynamic statistics, navigation buttons                  |
-| `ReportPanel.java`    | Dynamic stats, category summary, recent activities      |
+| `ReportPanel.java`    | Dynamic stats, category summary                         |
 | `MainFrame.java`      | Controller initialization, panel callbacks              |
 
 ---
@@ -103,14 +71,7 @@ Integrasi UI dengan controller **tanpa mengubah layout/styling UI**.
 ## Cara Menjalankan
 
 ```bash
-cd /home/manca/github/simorg-java-inventory
 mvn compile exec:java
-```
-
-Atau menggunakan IDE:
-
-```bash
-java -cp target/classes com.simorg.view.MainFrame
 ```
 
 ---
@@ -142,13 +103,6 @@ java -cp target/classes com.simorg.view.MainFrame
    - Konfirmasi dialog
    - Verifikasi item hilang dari tabel
 
-5. **Test Loan Operations**
-
-   - Buka "Peminjaman"
-   - Klik "Pinjam" → tambah peminjaman baru
-   - Pilih loan aktif → klik "Kembalikan"
-   - Verifikasi status berubah
-
-6. **Test Dashboard**
+5. **Test Dashboard**
    - Buka Dashboard
    - Verifikasi statistik menampilkan data real

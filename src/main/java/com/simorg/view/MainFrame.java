@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 import com.simorg.controller.ItemController;
-import com.simorg.controller.LoanController;
 import com.simorg.model.Item;
 
 public class MainFrame extends JFrame {
@@ -18,12 +17,10 @@ public class MainFrame extends JFrame {
     private DashboardPanel dashboardPanel;
     private ItemListPanel itemListPanel;
     private ItemFormPanel itemFormPanel;
-    private LoanListPanel loanListPanel;
     private ReportPanel reportPanel;
 
     // Controllers
     private ItemController itemController;
-    private LoanController loanController;
 
     public MainFrame() {
         setTitle("SIMORG - Smart Inventory Management for Organization");
@@ -31,6 +28,9 @@ public class MainFrame extends JFrame {
         setSize(1400, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        // Initialize controllers dan load data dari file
+        initializeControllers();
 
         add(createSidebar(), BorderLayout.WEST);
         add(createHeader(), BorderLayout.NORTH);
@@ -44,7 +44,6 @@ public class MainFrame extends JFrame {
         contentPanel.add(dashboardPanel, "Dashboard");
         contentPanel.add(itemListPanel, "Data Inventaris");
         contentPanel.add(itemFormPanel, "Tambah Barang");
-        contentPanel.add(loanListPanel, "Peminjaman");
         contentPanel.add(reportPanel, "Laporan");
 
         add(contentPanel, BorderLayout.CENTER);
@@ -75,7 +74,6 @@ public class MainFrame extends JFrame {
                 "Dashboard",
                 "Data Inventaris",
                 "Tambah Barang",
-                "Peminjaman",
                 "Laporan"
         };
 
@@ -161,19 +159,23 @@ public class MainFrame extends JFrame {
             case "Data Inventaris":
                 itemListPanel.refreshTable();
                 break;
-            case "Peminjaman":
-                loanListPanel.refreshTable();
-                break;
             case "Laporan":
                 reportPanel.refreshData();
                 break;
         }
     }
 
+    // ================= CONTROLLER INITIALIZATION =================
+    private void initializeControllers() {
+        itemController = new ItemController();
+
+        // Load data dari file
+        itemController.loadFromFile();
+    }
+
     private void refreshAllData() {
         dashboardPanel.refreshStats();
         itemListPanel.refreshTable();
-        loanListPanel.refreshTable();
         reportPanel.refreshData();
     }
 
@@ -182,15 +184,13 @@ public class MainFrame extends JFrame {
         dashboardPanel = new DashboardPanel();
         itemListPanel = new ItemListPanel();
         itemFormPanel = new ItemFormPanel();
-        loanListPanel = new LoanListPanel();
         reportPanel = new ReportPanel();
 
         // Set controllers
         itemFormPanel.setController(itemController);
         itemListPanel.setController(itemController);
-        loanListPanel.setControllers(loanController, itemController);
-        dashboardPanel.setControllers(itemController, loanController);
-        reportPanel.setControllers(itemController, loanController);
+        dashboardPanel.setController(itemController);
+        reportPanel.setController(itemController);
 
         // Setup callbacks untuk ItemFormPanel
         itemFormPanel.setOnSaveCallback(() -> {
@@ -216,7 +216,6 @@ public class MainFrame extends JFrame {
             switchToPanel("Tambah Barang");
         });
         dashboardPanel.setOnLihatInventoryCallback(() -> switchToPanel("Data Inventaris"));
-        dashboardPanel.setOnKelolaPeminjamanCallback(() -> switchToPanel("Peminjaman"));
         dashboardPanel.setOnLihatLaporanCallback(() -> switchToPanel("Laporan"));
     }
 
@@ -241,15 +240,5 @@ public class MainFrame extends JFrame {
                 }
             }
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception ignored) {
-            }
-            new MainFrame().setVisible(true);
-        });
     }
 }
