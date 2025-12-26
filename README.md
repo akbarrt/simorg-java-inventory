@@ -1,195 +1,73 @@
-# SIMORG
+# Feature Branch: File Handling Implementation
 
-**Smart Inventory Management for Organization**
+Branch `feature-file-handling` ini fokus pada implementasi **Data Persistence** (penyimpanan data permanen) menggunakan file CSV. Fitur ini memungkinkan data inventaris tetap tersimpan meskipun aplikasi ditutup.
 
-SIMORG adalah aplikasi desktop berbasis **Java Swing** yang dikembangkan untuk membantu organisasi mengelola data inventaris secara terstruktur. Aplikasi ini mendukung operasi CRUD, sorting, searching, dan penyimpanan data permanen menggunakan **File Handling (.csv)**.
+## 📋 Fitur Utama di Branch Ini
 
----
+### 1. CSV Read/Write Operations
 
-## 📁 Struktur Project
+Mekanisme penyimpanan dan pembacaan data ke/dari file .csv lokal.
 
-```
-simorg-java-inventory/
-├── src/main/java/com/simorg/
-│   ├── app/
-│   │   └── Main.java                  ← Entry point aplikasi
-│   ├── model/
-│   │   └── Item.java                  ← Model barang (OOP + CSV parse)
-│   ├── controller/
-│   │   └── ItemController.java        ← CRUD + search + sort items
-│   ├── util/
-│   │   ├── FileHandler.java           ← Read/write CSV
-│   │   └── IdGenerator.java           ← Generate unique ID
-│   └── view/
-│       ├── MainFrame.java             ← Frame utama + CardLayout navigasi
-│       ├── DashboardPanel.java        ← Statistik + quick actions
-│       ├── ItemListPanel.java         ← JTable + sorting + searching
-│       ├── ItemFormPanel.java         ← Form tambah/edit barang
-│       └── ReportPanel.java           ← Laporan ringkasan
-├── data/
-│   └── items.csv                      ← Data inventaris
-└── README.md                          ← Dokumentasi lengkap
-```
+- **Auto-create Directory**: Membuat folder `data/` secara otomatis jika belum ada.
+- **Load Items**: Membaca data item saat aplikasi dimulai.
+- **Save Items**: Menyimpan perubahan data (add/edit/delete) secara real-time.
+- **Robust Parsing**: Mencegah crash jika ada satu baris data yang corrupt (skip line).
 
 ---
 
-## 🎯 Tujuan Pengembangan
+## 🛠️ Implementasi Teknis
 
-- Mengimplementasikan konsep **Object-Oriented Programming (OOP)**
-- Mengembangkan aplikasi **GUI berbasis Java Swing**
-- Melatih penggunaan **Git & GitHub** dalam kerja tim
-- Menerapkan **File Handling** untuk penyimpanan data permanen
-- Menerapkan **validasi input** dan **exception handling**
+### Class `FileHandler`
 
----
+**Path**: `src/main/java/com/simorg/util/FileHandler.java`
 
-## 🛠️ Teknologi yang Digunakan
+Ini adalah utility class static yang menangani semua operasi I/O file.
 
-| Komponen               | Detail                      |
-| ---------------------- | --------------------------- |
-| **Bahasa Pemrograman** | Java                        |
-| **GUI Framework**      | Java Swing                  |
-| **Arsitektur**         | MVC (Model-View-Controller) |
-| **Penyimpanan Data**   | File Handling (.csv)        |
-| **Struktur Data**      | ArrayList                   |
-| **Utility API**        | LocalDate, Comparator       |
-| **Version Control**    | Git & GitHub                |
+#### Format Data CSV
 
----
-
-## ✨ Fitur Aplikasi
-
-- ✅ Dashboard dengan statistik dan quick actions
-- ✅ Manajemen inventaris (CRUD - Create, Read, Update, Delete)
-- ✅ Tabel data dengan fitur **sorting** dan **searching**
-- ✅ Form input dengan validasi data
-- ✅ Halaman laporan ringkasan
-- ✅ Penyimpanan data permanen dalam format `.csv`
-- ✅ Exception handling untuk berbagai skenario error
-
----
-
-## 🖥️ Struktur Halaman (4 Screens)
-
-### 1. Dashboard
-
-Menampilkan ringkasan statistik (total jenis barang, total quantity) dan quick access buttons.
-
-### 2. Data Inventaris (ItemListPanel)
-
-Tabel data inventaris dengan fitur:
-
-- Sorting berdasarkan nama, kategori, jumlah, tanggal
-- Real-time searching/filtering
-- Action buttons (Edit, Hapus, Detail)
-
-### 3. Form Input Barang (ItemFormPanel)
-
-Form untuk menambah dan mengedit data barang dengan:
-
-- Validasi input wajib
-- Kategori dropdown dengan opsi custom
-- Auto-generated ID
-
-### 4. Laporan (ReportPanel)
-
-Menampilkan:
-
-- Statistik ringkasan inventaris
-- Breakdown per kategori
-
----
-
-## 📦 Penjelasan Package
-
-| Package                 | Fungsi                     | Class                                                                          |
-| ----------------------- | -------------------------- | ------------------------------------------------------------------------------ |
-| `com.simorg.app`        | Entry point aplikasi       | `Main.java`                                                                    |
-| `com.simorg.model`      | Data class / entity (OOP)  | `Item.java`                                                                    |
-| `com.simorg.view`       | UI components (Java Swing) | `MainFrame`, `DashboardPanel`, `ItemListPanel`, `ItemFormPanel`, `ReportPanel` |
-| `com.simorg.controller` | Business logic             | `ItemController.java`                                                          |
-| `com.simorg.util`       | Helper/utilities           | `FileHandler.java`, `IdGenerator.java`                                         |
-
----
-
-## 💾 Format File CSV
-
-### items.csv
+Header file `items.csv`:
 
 ```csv
 id,name,category,quantity,condition,location,dateAdded,description
-ITM1734847200001,Laptop Dell Inspiron,Elektronik,5,Baik,Ruang IT,2024-12-01,Laptop untuk keperluan kerja staff
 ```
 
----
+#### Method Utama
 
-## 🔄 Alur Kerja Aplikasi
+| Method                               | Deskripsi                                                                  |
+| :----------------------------------- | :------------------------------------------------------------------------- |
+| `ensureDataDirectory()`              | Mengecek dan membuat folder `data/` jika belum ada.                        |
+| `loadItems(String path)`             | Membaca file CSV baris per baris, mem-parsing string menjadi objek `Item`. |
+| `saveItems(String path, List<Item>)` | Mengkonversi list objek `Item` menjadi format CSV dan menulisnya ke file.  |
 
-```
-[Dashboard]
-    ├── Klik "Tambah Barang" → [ItemFormPanel] → Submit → Data tersimpan ke items.csv
-    ├── Klik "Lihat Inventaris" → [ItemListPanel] → Edit/Hapus → Update items.csv
-    └── Klik "Lihat Laporan" → [ReportPanel] → Statistik dari CSV
-```
+### Data Parsing Strategy
 
----
+1.  **Reading (`fromCSVString`)**:
 
-## ⚠️ Exception Handling
+    - Membaca baris teks.
+    - Split berdasarkan koma (`,`).
+    - Handle exception per baris agar 1 data error tidak menggagalkan seluruh load process.
 
-Aplikasi menerapkan penanganan error untuk:
-
-- Validasi input (nama kosong, angka tidak valid)
-- File tidak ditemukan (auto-create)
-- Format CSV tidak valid
-- IOException saat read/write file
+2.  **Writing (`toCSVString`)**:
+    - Menggabungkan field object menjadi satu string CSV.
+    - Menangani karakter kusus (jika ada, misal koma dalam deskripsi) - _Currently basic implementation_.
 
 ---
 
-## 🚀 Cara Menjalankan
+## ⚠️ Error Handling & Safety
 
-### Menggunakan Maven
+Branch ini juga mengimplementasikan langkah-langkah keamanan data:
 
-```bash
-cd simorg-java-inventory
-mvn compile exec:java
-```
-
-### Menggunakan IDE
-
-1. Buka project di IntelliJ IDEA / Eclipse / NetBeans
-2. Set `src/main/java` sebagai Source Root
-3. Run `Main.java`
+- **Try-with-resources**: Memastikan `BufferedReader` dan `BufferedWriter` selalu ditutup (mencegah memory leak).
+- **Line Skipping**: Jika parsing gagal pada baris ke-X, baris tersebut dilewati, error dicetak ke log, dan lanjut ke baris berikutnya.
+- **Directory Check**: Mencegah `FileNotFoundException` dengan selalu memastikan folder tujuan ada sebelum menulis.
 
 ---
 
-## 👥 Tim Pengembang
+## ✅ Status Implementasi
 
-- Mohamad Akbar Noviandi
-- Figa Brilliant Daffa
-
----
-
-## 🌿 Git Workflow
-
-**Branching Strategy:**
-
-- `feature-ui` - Pengembangan UI/GUI
-- `feature-crud` - Fitur CRUD
-- `feature-file-handling` - Fitur penyimpanan data
-- `main` - Branch utama (production-ready)
-
----
-
-## 📌 Informasi Proyek
-
-| Detail          | Keterangan                      |
-| --------------- | ------------------------------- |
-| **Tujuan**      | Ujian Akhir Praktikum (UAP)     |
-| **Mata Kuliah** | Pemrograman Lanjut              |
-| **Institusi**   | Universitas Muhammadiyah Malang |
-
----
-
-## 📄 Lisensi
-
-Project ini dibuat untuk keperluan akademik dan pembelajaran.
+- [x] Create `data/` directory
+- [x] Read `items.csv` -> `List<Item>`
+- [x] Write `List<Item>` -> `items.csv`
+- [x] Parse CSV String to Object
+- [x] Convert Object to CSV String
+- [x] Handle basic IO Exceptions
