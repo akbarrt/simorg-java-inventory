@@ -1,232 +1,193 @@
-# SIMORG
+# Feature Branch: UI Implementation
 
-**Smart Inventory Management for Organization**
+Branch `feature-ui` ini fokus pada implementasi **User Interface (GUI)** menggunakan **Java Swing**. Branch ini berisi semua komponen visual aplikasi SIMORG tanpa logika bisnis (controller/model).
 
-SIMORG adalah aplikasi desktop berbasis **Java Swing** yang dikembangkan untuk membantu organisasi mengelola data inventaris dan peminjaman secara terstruktur. Aplikasi ini mendukung operasi CRUD, sorting, searching, dan penyimpanan data permanen menggunakan **File Handling (.csv)**.
+## 📋 Fitur Utama di Branch Ini
 
----
+### 1. Main Application Window
 
-## 📁 Struktur Project
+**Class**: `MainFrame.java`
 
-```
-simorg-java-inventory/
-├── src/main/java/com/simorg/
-│   ├── app/
-│   │   └── Main.java                  ← Entry point aplikasi
-│   ├── model/
-│   │   ├── Item.java                  ← Model barang (OOP + CSV parse)
-│   │   └── Loan.java                  ← Model peminjaman
-│   ├── controller/
-│   │   ├── ItemController.java        ← CRUD + search + sort items
-│   │   └── LoanController.java        ← CRUD loans + return logic
-│   ├── util/
-│   │   ├── FileHandler.java           ← Read/write CSV
-│   │   ├── UIConstants.java           ← Warna, font, helper dialog
-│   │   ├── ItemComparators.java       ← Sorting dengan Comparator
-│   │   └── ValidationHelper.java      ← Validasi + exception handling
-│   └── view/
-│       ├── MainFrame.java             ← Frame utama + CardLayout navigasi
-│       ├── DashboardPanel.java        ← Statistik + quick actions
-│       ├── ItemListPanel.java         ← JTable + sorting + searching
-│       ├── ItemFormPanel.java         ← Form tambah/edit barang
-│       ├── LoanListPanel.java         ← Kelola peminjaman
-│       └── ReportPanel.java           ← Laporan + history
-├── data/
-│   ├── items.csv                      ← Sample data inventaris (8 items)
-│   └── loans.csv                      ← Sample data peminjaman (4 loans)
-└── README.md                          ← Dokumentasi lengkap
-```
+Frame utama aplikasi dengan komponen:
 
----
+- **Sidebar Navigation** - Menu navigasi dengan 5 panel utama
+- **Header Bar** - Menampilkan judul aplikasi dan info user
+- **Content Area** - Area konten dinamis menggunakan `CardLayout`
 
-## 🎯 Tujuan Pengembangan
+### 2. Panel-Panel Utama
 
-- Mengimplementasikan konsep **Object-Oriented Programming (OOP)**
-- Mengembangkan aplikasi **GUI berbasis Java Swing**
-- Melatih penggunaan **Git & GitHub** dalam kerja tim
-- Menerapkan **File Handling** untuk penyimpanan data permanen
-- Menerapkan **validasi input** dan **exception handling**
+#### Dashboard Panel
 
----
+**File**: `DashboardPanel.java`
 
-## 🛠️ Teknologi yang Digunakan
+Halaman utama yang menampilkan:
 
-| Komponen               | Detail                      |
-| ---------------------- | --------------------------- |
-| **Bahasa Pemrograman** | Java                        |
-| **GUI Framework**      | Java Swing                  |
-| **Arsitektur**         | MVC (Model-View-Controller) |
-| **Penyimpanan Data**   | File Handling (.csv)        |
-| **Struktur Data**      | ArrayList                   |
-| **Utility API**        | LocalDate, Comparator       |
-| **Version Control**    | Git & GitHub                |
+- Statistik ringkasan (total barang, kategori, dll)
+- Quick action buttons
+- Welcome message
 
----
+#### Item List Panel
 
-## ✨ Fitur Aplikasi
+**File**: `ItemListPanel.java`
 
-- ✅ Dashboard dengan statistik dan quick actions
-- ✅ Manajemen inventaris (CRUD - Create, Read, Update, Delete)
-- ✅ Manajemen peminjaman barang
-- ✅ Tabel data dengan fitur **sorting** dan **searching**
-- ✅ Form input dengan validasi data
-- ✅ Halaman laporan dan riwayat peminjaman
-- ✅ Penyimpanan data permanen dalam format `.csv`
-- ✅ Exception handling untuk berbagai skenario error
+Panel untuk menampilkan data inventaris dalam bentuk tabel:
 
----
+- `JTable` untuk menampilkan data
+- Search bar untuk filtering
+- Sorting dropdown
+- Action buttons (Edit, Delete, Detail)
 
-## 🖥️ Struktur Halaman (5 Screens)
+#### Item Form Panel
 
-### 1. Dashboard
+**File**: `ItemFormPanel.java`
 
-Menampilkan ringkasan statistik (total barang, quantity, peminjaman aktif, terlambat) dan quick access buttons.
+Form input untuk menambah/edit barang:
 
-### 2. Data Inventaris (ItemListPanel)
+- Text fields untuk input data
+- Dropdown kategori
+- Date picker
+- Buttons (Simpan, Reset)
 
-Tabel data inventaris dengan fitur:
+#### Loan List Panel
 
-- Sorting berdasarkan nama, kategori, jumlah, tanggal
-- Real-time searching/filtering
-- Action buttons (Edit, Hapus, Detail)
+**File**: `LoanListPanel.java`
 
-### 3. Form Input Barang (ItemFormPanel)
+Panel manajemen peminjaman:
 
-Form untuk menambah dan mengedit data barang dengan:
+- Tabel data peminjaman
+- Filter berdasarkan status
+- Action buttons (Pinjam, Kembalikan, Hapus)
 
-- Validasi input wajib
-- Kategori dropdown dengan opsi custom
-- Auto-generated ID
+#### Report Panel
 
-### 4. Data Peminjaman (LoanListPanel)
+**File**: `ReportPanel.java`
 
-Kelola peminjaman dengan fitur:
+Halaman laporan dan statistik:
 
-- Filter by status (Semua, Dipinjam, Dikembalikan, Terlambat)
-- Form input peminjaman baru
-- Proses pengembalian barang
-
-### 5. Laporan (ReportPanel)
-
-Menampilkan:
-
-- Statistik ringkasan inventaris
+- Ringkasan data inventaris
 - Breakdown per kategori
-- Riwayat aktivitas peminjaman terbaru
+- Grafik/chart (jika ada)
 
 ---
 
-## 📦 Penjelasan Package
+## 🎨 Design System
 
-| Package                 | Fungsi                     | Class                                                                                           |
-| ----------------------- | -------------------------- | ----------------------------------------------------------------------------------------------- |
-| `com.simorg.app`        | Entry point aplikasi       | `Main.java`                                                                                     |
-| `com.simorg.model`      | Data class / entity (OOP)  | `Item.java`, `Loan.java`                                                                        |
-| `com.simorg.view`       | UI components (Java Swing) | `MainFrame`, `DashboardPanel`, `ItemListPanel`, `ItemFormPanel`, `LoanListPanel`, `ReportPanel` |
-| `com.simorg.controller` | Business logic             | `ItemController.java`, `LoanController.java`                                                    |
-| `com.simorg.util`       | Helper/utilities           | `FileHandler`, `UIConstants`, `ItemComparators`, `ValidationHelper`                             |
+### Color Palette
 
----
+```java
+// Sidebar
+Background: #2D3440 (Dark Blue-Gray)
+Active Button: #3C4655
+Hover: #373E4A
 
-## 💾 Format File CSV
-
-### items.csv
-
-```csv
-id,name,category,quantity,condition,location,dateAdded,description
-ITM1734847200001,Laptop Dell Inspiron,Elektronik,5,Baik,Ruang IT,2024-12-01,Laptop untuk keperluan kerja staff
+// Content Area
+Background: #FFFFFF (White)
+Text: #2C3E50 (Dark Gray)
+Accent: #3498DB (Blue)
 ```
 
-### loans.csv
+### Typography
 
-```csv
-id,itemId,borrowerName,borrowerContact,quantity,loanDate,dueDate,returnDate,status,notes
-LN1734847300001,ITM1734847200001,Ahmad Fauzi,081234567890,1,2024-12-15,2024-12-22,,DIPINJAM,Untuk presentasi
-```
+- **Font Family**: Segoe UI
+- **Title**: Bold, 22px
+- **Menu**: Plain, 14px
+- **Content**: Plain, 13-14px
 
----
-
-## 🔄 Alur Kerja Aplikasi
+### Layout Structure
 
 ```
-[Dashboard]
-    ├── Klik "Tambah Barang" → [ItemFormPanel] → Submit → Data tersimpan ke items.csv
-    ├── Klik "Lihat Inventaris" → [ItemListPanel] → Edit/Hapus → Update items.csv
-    ├── Klik "Kelola Peminjaman" → [LoanListPanel] → Pinjam/Kembalikan → Update loans.csv
-    └── Klik "Lihat Laporan" → [ReportPanel] → Statistik dari kedua CSV
+┌─────────────────────────────────────────┐
+│           Header Bar (50px)             │
+├──────────┬──────────────────────────────┤
+│          │                              │
+│ Sidebar  │      Content Panel           │
+│ (220px)  │      (CardLayout)            │
+│          │                              │
+│          │                              │
+└──────────┴──────────────────────────────┘
 ```
 
 ---
 
-## ⚠️ Exception Handling
+## 🛠️ Implementasi Teknis
 
-Aplikasi menerapkan penanganan error untuk:
+### Navigation System
 
-- Validasi input (nama kosong, angka tidak valid)
-- File tidak ditemukan (auto-create)
-- Format CSV tidak valid
-- IOException saat read/write file
-- Data duplikat atau tidak ditemukan
+Menggunakan **CardLayout** untuk switching antar panel:
+
+```java
+CardLayout cardLayout = new CardLayout();
+JPanel contentPanel = new JPanel(cardLayout);
+
+// Add panels
+contentPanel.add(dashboardPanel, "Dashboard");
+contentPanel.add(itemListPanel, "Data Inventaris");
+
+// Switch panel
+cardLayout.show(contentPanel, "Dashboard");
+```
+
+### Event Handling
+
+- **Button Click**: `ActionListener` untuk navigasi dan aksi
+- **Mouse Hover**: `MouseAdapter` untuk efek hover pada sidebar
+- **Table Selection**: `ListSelectionListener` untuk aksi pada baris tabel
+
+### Component Styling
+
+Semua komponen di-styling secara manual menggunakan:
+
+- `setBackground()`, `setForeground()`
+- `setFont()`
+- `setBorder()`
+- Custom `Dimension` untuk sizing
 
 ---
 
-## 🚀 Cara Menjalankan
+## 📐 Panel Specifications
 
-### Compile
+| Panel              | Komponen Utama                 | Ukuran/Layout           |
+| ------------------ | ------------------------------ | ----------------------- |
+| **MainFrame**      | Sidebar, Header, Content       | BorderLayout (1400x800) |
+| **DashboardPanel** | Stats Cards, Buttons           | GridLayout / FlowLayout |
+| **ItemListPanel**  | JTable, JScrollPane, Search    | BorderLayout            |
+| **ItemFormPanel**  | JTextField, JComboBox, JButton | GridBagLayout           |
+| **LoanListPanel**  | JTable, Filter Buttons         | BorderLayout            |
+| **ReportPanel**    | Labels, Stats Display          | BoxLayout               |
+
+---
+
+## ✅ Status Implementasi
+
+- [x] Main window structure (MainFrame)
+- [x] Sidebar navigation with hover effects
+- [x] Header bar
+- [x] Dashboard panel layout
+- [x] Item list panel with table
+- [x] Item form panel with input fields
+- [x] Loan list panel
+- [x] Report panel
+- [x] CardLayout navigation system
+- [x] Consistent color scheme & typography
+
+---
+
+## 🚀 Cara Menjalankan (UI Only)
 
 ```bash
 cd simorg-java-inventory
-javac -d out src/main/java/com/simorg/**/*.java
+javac -d bin src/main/java/com/simorg/view/*.java
+java -cp bin com.simorg.view.MainFrame
 ```
 
-### Run
-
-```bash
-java -cp out com.simorg.app.MainFrame
-```
-
-### Atau menggunakan IDE
-
-1. Buka project di IntelliJ IDEA / Eclipse / NetBeans
-2. Set `src/main/java` sebagai Source Root
-3. Run `Main.java`
+> **Note**: Branch ini hanya berisi UI components. Untuk fitur lengkap (dengan data & logic), merge dengan branch `feature-crud` dan `feature-file-handling`.
 
 ---
 
-## 👥 Tim Pengembang
+## 🎯 Next Steps
 
-- Mohamad Akbar Noviandi
-- Figa Brilliant Daffa
+Setelah UI selesai, branch ini akan di-merge dengan:
 
----
-
-## 🌿 Git Workflow
-
-**Branching Strategy:**
-
-- `feature-ui` - Pengembangan UI/GUI
-- `feature-crud` - Fitur CRUD
-- `feature-file-handling` - Fitur penyimpanan data
-- `main` - Branch utama (production-ready)
-
-**Practices:**
-
-- Push dilakukan secara berkala
-- Pull request untuk setiap fitur
-- Code review sebelum merge ke main
-
----
-
-## 📌 Informasi Proyek
-
-| Detail          | Keterangan                      |
-| --------------- | ------------------------------- |
-| **Tujuan**      | Ujian Akhir Praktikum (UAP)     |
-| **Mata Kuliah** | Pemrograman Lanjut              |
-| **Institusi**   | Universitas Muhammadiyah Malang |
-
----
-
-## 📄 Lisensi
-
-Project ini dibuat untuk keperluan akademik dan pembelajaran.
+1. `feature-crud` - Untuk menambahkan logika CRUD
+2. `feature-file-handling` - Untuk menambahkan persistence data
+3. `main` - Final integration
