@@ -52,15 +52,3 @@ simorg-java-inventory/
 - **File I/O** - FileHandler dengan java.nio.file
 
 ---
-
-## 🚀 Cara Menjalankan
-
-```bash
-# Compile
-javac -d out src/main/java/com/simorg/**/*.java
-
-# Run
-java -cp out com.simorg.app.MainFrame
-```
-
-**Atau buka di IDE** → Run `Main.java`

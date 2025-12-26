@@ -1,232 +1,152 @@
-# SIMORG
+# Feature Branch: CRUD Implementation
 
-**Smart Inventory Management for Organization**
+Branch `feature-crud` ini fokus pada implementasi operasi **CRUD (Create, Read, Update, Delete)** untuk manajemen barang (Items) dan peminjaman (Loans) di aplikasi SIMORG.
 
-SIMORG adalah aplikasi desktop berbasis **Java Swing** yang dikembangkan untuk membantu organisasi mengelola data inventaris dan peminjaman secara terstruktur. Aplikasi ini mendukung operasi CRUD, sorting, searching, dan penyimpanan data permanen menggunakan **File Handling (.csv)**.
+## 📋 Fitur Utama di Branch Ini
 
----
+### 1. Item Management (Inventaris)
 
-## 📁 Struktur Project
+Implementasi lengkap CRUD untuk data barang:
 
-```
-simorg-java-inventory/
-├── src/main/java/com/simorg/
-│   ├── app/
-│   │   └── Main.java                  ← Entry point aplikasi
-│   ├── model/
-│   │   ├── Item.java                  ← Model barang (OOP + CSV parse)
-│   │   └── Loan.java                  ← Model peminjaman
-│   ├── controller/
-│   │   ├── ItemController.java        ← CRUD + search + sort items
-│   │   └── LoanController.java        ← CRUD loans + return logic
-│   ├── util/
-│   │   ├── FileHandler.java           ← Read/write CSV
-│   │   ├── UIConstants.java           ← Warna, font, helper dialog
-│   │   ├── ItemComparators.java       ← Sorting dengan Comparator
-│   │   └── ValidationHelper.java      ← Validasi + exception handling
-│   └── view/
-│       ├── MainFrame.java             ← Frame utama + CardLayout navigasi
-│       ├── DashboardPanel.java        ← Statistik + quick actions
-│       ├── ItemListPanel.java         ← JTable + sorting + searching
-│       ├── ItemFormPanel.java         ← Form tambah/edit barang
-│       ├── LoanListPanel.java         ← Kelola peminjaman
-│       └── ReportPanel.java           ← Laporan + history
-├── data/
-│   ├── items.csv                      ← Sample data inventaris (8 items)
-│   └── loans.csv                      ← Sample data peminjaman (4 loans)
-└── README.md                          ← Dokumentasi lengkap
-```
+- **Create**: Menambah barang baru dengan validasi input.
+  - _Class_: `ItemController.addItem()`
+  - _Data_: Disimpan ke ID unik (format `ITM...`).
+- **Read**: Menampilkan daftar barang di tabel (`JTable`).
+  - _Fitur_: Searching (by keyword) & Sorting (by name, quantity, category).
+- **Update**: Mengedit informasi barang yang sudah ada.
+  - _Class_: `ItemController.updateItem()`
+  - _Auto-save_: Perubahan langsung tersimpan ke file CSV.
+- **Delete**: Menghapus data barang dari sistem.
+  - _Confirmation_: Dialog konfirmasi sebelum hapus.
+
+### 2. Loan Management (Peminjaman)
+
+Sistem pencatatan peminjaman barang dengan status tracking:
+
+- **Borrow (Create)**: Mencatat peminjaman baru.
+  - _Validasi_: Cek stok barang tersedia sebelum dipinjam.
+  - _Status Awal_: `DIPINJAM`.
+- **Return (Update)**: Mengubah status menjadi `DIKEMBALIKAN`.
+  - _Logic_: Stok barang otomatis bertambah kembali.
+- **History (Read)**: Melihat riwayat peminjaman (Aktif/Selesai).
+- **Delete**: Menghapus record peminjaman (Hanya admin/clean up).
 
 ---
 
-## 🎯 Tujuan Pengembangan
+## 🛠️ Implementasi Teknis
 
-- Mengimplementasikan konsep **Object-Oriented Programming (OOP)**
-- Mengembangkan aplikasi **GUI berbasis Java Swing**
-- Melatih penggunaan **Git & GitHub** dalam kerja tim
-- Menerapkan **File Handling** untuk penyimpanan data permanen
-- Menerapkan **validasi input** dan **exception handling**
+### Architecture Pattern
 
----
+Menggunakan **MVC (Model-View-Controller)** yang dimodifikasi untuk aplikasi Desktop Swing.
 
-## 🛠️ Teknologi yang Digunakan
+| Komponen        | Deskripsi                       | Class Utama                                       |
+| --------------- | ------------------------------- | ------------------------------------------------- |
+| **Model**       | Representasi data objek         | `Item`, `Loan`                                    |
+| **View**        | Tampilan GUI (Swing)            | `ItemListPanel`, `ItemFormPanel`, `LoanListPanel` |
+| **Controller**  | Logika bisnis & manipulasi data | `ItemController`, `LoanController`                |
+| **Data Access** | Baca/Tulis file CSV             | `FileHandler` (via `model` package)               |
 
-| Komponen               | Detail                      |
-| ---------------------- | --------------------------- |
-| **Bahasa Pemrograman** | Java                        |
-| **GUI Framework**      | Java Swing                  |
-| **Arsitektur**         | MVC (Model-View-Controller) |
-| **Penyimpanan Data**   | File Handling (.csv)        |
-| **Struktur Data**      | ArrayList                   |
-| **Utility API**        | LocalDate, Comparator       |
-| **Version Control**    | Git & GitHub                |
+### Key Classes
 
----
+#### `ItemController.java`
 
-## ✨ Fitur Aplikasi
+Pusat logika untuk manipulasi data barang.
 
-- ✅ Dashboard dengan statistik dan quick actions
-- ✅ Manajemen inventaris (CRUD - Create, Read, Update, Delete)
-- ✅ Manajemen peminjaman barang
-- ✅ Tabel data dengan fitur **sorting** dan **searching**
-- ✅ Form input dengan validasi data
-- ✅ Halaman laporan dan riwayat peminjaman
-- ✅ Penyimpanan data permanen dalam format `.csv`
-- ✅ Exception handling untuk berbagai skenario error
+- Menggunakan `ArrayList<Item>` sebagai in-memory cache.
+- `Stream API` digunakan untuk filter (search) dan mapping data.
+- `Comparator` digunakan untuk fitur sorting dinamis.
+
+#### `IdGenerator.java`
+
+Generator ID unik thread-safe.
+
+- Format Item: `ITM` + Timestamp (ms) + Counter
+- Format Loan: `LN` + Timestamp (ms) + Counter
+- Mencegah duplikasi ID saat pembuatan data cepat.
 
 ---
 
-## 🖥️ Struktur Halaman (5 Screens)
+## 💾 Data Persistence
 
-### 1. Dashboard
+Data disimpan secara permanen menggunakan format CSV di folder `data/`:
 
-Menampilkan ringkasan statistik (total barang, quantity, peminjaman aktif, terlambat) dan quick access buttons.
+- `items.csv`: Database barang.
+- `loans.csv`: Database transaksi peminjaman.
 
-### 2. Data Inventaris (ItemListPanel)
-
-Tabel data inventaris dengan fitur:
-
-- Sorting berdasarkan nama, kategori, jumlah, tanggal
-- Real-time searching/filtering
-- Action buttons (Edit, Hapus, Detail)
-
-### 3. Form Input Barang (ItemFormPanel)
-
-Form untuk menambah dan mengedit data barang dengan:
-
-- Validasi input wajib
-- Kategori dropdown dengan opsi custom
-- Auto-generated ID
-
-### 4. Data Peminjaman (LoanListPanel)
-
-Kelola peminjaman dengan fitur:
-
-- Filter by status (Semua, Dipinjam, Dikembalikan, Terlambat)
-- Form input peminjaman baru
-- Proses pengembalian barang
-
-### 5. Laporan (ReportPanel)
-
-Menampilkan:
-
-- Statistik ringkasan inventaris
-- Breakdown per kategori
-- Riwayat aktivitas peminjaman terbaru
+Setiap operasi CRUD (Add/Edit/Delete) akan memicu `saveToFile()` untuk menjamin data tidak hilang.
 
 ---
 
-## 📦 Penjelasan Package
+## 🔄 System Flow
 
-| Package                 | Fungsi                     | Class                                                                                           |
-| ----------------------- | -------------------------- | ----------------------------------------------------------------------------------------------- |
-| `com.simorg.app`        | Entry point aplikasi       | `Main.java`                                                                                     |
-| `com.simorg.model`      | Data class / entity (OOP)  | `Item.java`, `Loan.java`                                                                        |
-| `com.simorg.view`       | UI components (Java Swing) | `MainFrame`, `DashboardPanel`, `ItemListPanel`, `ItemFormPanel`, `LoanListPanel`, `ReportPanel` |
-| `com.simorg.controller` | Business logic             | `ItemController.java`, `LoanController.java`                                                    |
-| `com.simorg.util`       | Helper/utilities           | `FileHandler`, `UIConstants`, `ItemComparators`, `ValidationHelper`                             |
+Berikut adalah alur data (flow) bagaimana aplikasi bekerja menangani permintaan user.
 
----
+### 1. General Data Flow (MVC Interaction)
 
-## 💾 Format File CSV
+Bagaimana komponen saling berinteraksi saat user melakukan aksi.
 
-### items.csv
+```mermaid
+sequenceDiagram
+    participant User
+    participant View as GUI (View)
+    participant Ctrl as Controller
+    participant Model as Data Model
+    participant DB as FileHandler (CSV)
 
-```csv
-id,name,category,quantity,condition,location,dateAdded,description
-ITM1734847200001,Laptop Dell Inspiron,Elektronik,5,Baik,Ruang IT,2024-12-01,Laptop untuk keperluan kerja staff
+    User->>View: Input Data / Click Button
+    View->>Ctrl: Call Method (e.g., addItem)
+    Ctrl->>Model: Create/Update Object
+    Ctrl->>DB: saveToFile()
+    DB->>DB: Write to .csv
+    DB-->>Ctrl: Success
+    Ctrl-->>View: Refresh Data
+    View-->>User: Show Updated Table/Dialog
 ```
 
-### loans.csv
+### 2. Add Item Flow
 
-```csv
-id,itemId,borrowerName,borrowerContact,quantity,loanDate,dueDate,returnDate,status,notes
-LN1734847300001,ITM1734847200001,Ahmad Fauzi,081234567890,1,2024-12-15,2024-12-22,,DIPINJAM,Untuk presentasi
+Alur detail saat user menambahkan barang baru.
+
+```mermaid
+flowchart TD
+    Start([User Inputs Data]) --> Validate{Valid Input?}
+    Validate -- No --> ShowError[Show Error Message]
+    ShowError --> Start
+    Validate -- Yes --> GenID[Generate Unique ID (ITM...)]
+    GenID --> CreateObj[Create Item Object]
+    CreateObj --> AddList[Add to Memory List]
+    AddList --> SaveFile[Save to items.csv]
+    SaveFile --> UpdateUI[Update Table View]
+    UpdateUI --> End([Finish])
+```
+
+### 3. Loan Item Flow (Peminjaman)
+
+Alur peminjaman barang dengan pengecekan stok.
+
+```mermaid
+flowchart TD
+    Request([User Requests Loan]) --> CheckStock{Stock Available?}
+    CheckStock -- No --> ErrorStock[Show 'Out of Stock']
+    CheckStock -- Yes --> InputData[Input Borrower Data]
+    InputData --> GenLoanID[Generate Loan ID (LN...)]
+    GenLoanID --> ReduceStock[Decrease Item Quantity]
+    ReduceStock --> CreateLoan[Create Loan Record]
+    CreateLoan --> SaveAll[Save loans.csv & items.csv]
+    SaveAll --> End([Loan Active])
 ```
 
 ---
 
-## 🔄 Alur Kerja Aplikasi
+## ✅ Status Implementasi
 
-```
-[Dashboard]
-    ├── Klik "Tambah Barang" → [ItemFormPanel] → Submit → Data tersimpan ke items.csv
-    ├── Klik "Lihat Inventaris" → [ItemListPanel] → Edit/Hapus → Update items.csv
-    ├── Klik "Kelola Peminjaman" → [LoanListPanel] → Pinjam/Kembalikan → Update loans.csv
-    └── Klik "Lihat Laporan" → [ReportPanel] → Statistik dari kedua CSV
-```
-
----
-
-## ⚠️ Exception Handling
-
-Aplikasi menerapkan penanganan error untuk:
-
-- Validasi input (nama kosong, angka tidak valid)
-- File tidak ditemukan (auto-create)
-- Format CSV tidak valid
-- IOException saat read/write file
-- Data duplikat atau tidak ditemukan
+- [x] **Item CRUD** (Add, Edit, Delete, View)
+- [x] **Search & Filter** Barang
+- [x] **Sorting** Barang
+- [x] **Loan CRUD** (Borrow, Return, View)
+- [x] **CSV Integration**
+- [x] **UI Validation**
 
 ---
 
-## 🚀 Cara Menjalankan
-
-### Compile
-
-```bash
-cd simorg-java-inventory
-javac -d out src/main/java/com/simorg/**/*.java
-```
-
-### Run
-
-```bash
-java -cp out com.simorg.app.MainFrame
-```
-
-### Atau menggunakan IDE
-
-1. Buka project di IntelliJ IDEA / Eclipse / NetBeans
-2. Set `src/main/java` sebagai Source Root
-3. Run `Main.java`
-
----
-
-## 👥 Tim Pengembang
-
-- Mohamad Akbar Noviandi
-- Figa Brilliant Daffa
-
----
-
-## 🌿 Git Workflow
-
-**Branching Strategy:**
-
-- `feature-ui` - Pengembangan UI/GUI
-- `feature-crud` - Fitur CRUD
-- `feature-file-handling` - Fitur penyimpanan data
-- `main` - Branch utama (production-ready)
-
-**Practices:**
-
-- Push dilakukan secara berkala
-- Pull request untuk setiap fitur
-- Code review sebelum merge ke main
-
----
-
-## 📌 Informasi Proyek
-
-| Detail          | Keterangan                      |
-| --------------- | ------------------------------- |
-| **Tujuan**      | Ujian Akhir Praktikum (UAP)     |
-| **Mata Kuliah** | Pemrograman Lanjut              |
-| **Institusi**   | Universitas Muhammadiyah Malang |
-
----
-
-## 📄 Lisensi
-
-Project ini dibuat untuk keperluan akademik dan pembelajaran.
+> **Note:** Gunakan branch ini untuk testing dan validasi semua fitur manipulasi data sebelum merge ke main branch.
