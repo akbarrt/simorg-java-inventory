@@ -1,6 +1,4 @@
-package com.simorg.util;
-
-import com.simorg.model.Item;
+package com.simorg.model;
 
 import java.io.*;
 import java.nio.file.*;

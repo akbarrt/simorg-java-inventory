@@ -1,7 +1,7 @@
 package com.simorg.controller;
 
+import com.simorg.model.FileHandler;
 import com.simorg.model.Item;
-import com.simorg.util.FileHandler;
 import com.simorg.util.IdGenerator;
 
 import java.time.LocalDate;
@@ -52,7 +52,7 @@ public class ItemController {
             item.setDateAdded(LocalDate.now());
         }
         items.add(item);
-        saveToFile(); // Auto-save
+        saveToFile();
     }
 
     /**
@@ -63,7 +63,7 @@ public class ItemController {
             if (items.get(i).getId().equals(id)) {
                 updatedItem.setId(id);
                 items.set(i, updatedItem);
-                saveToFile(); // Auto-save
+                saveToFile();
                 return true;
             }
         }
@@ -76,7 +76,7 @@ public class ItemController {
     public boolean deleteItem(String id) {
         boolean removed = items.removeIf(item -> item.getId().equals(id));
         if (removed) {
-            saveToFile(); // Auto-save
+            saveToFile();
         }
         return removed;
     }
